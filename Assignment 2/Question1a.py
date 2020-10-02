@@ -4,15 +4,14 @@ data_array = []
 m, k = 1, 10
 
 # Generate Weights
-sum = 0
+weight_sum = 0
 for i in range(2, k + 1):
-    sum += 0.9 ** i
+    weight_sum += 0.9 ** i
 
 weights = []
 for i in range(2, k + 1):
-    wi = (0.9 ** i) / sum
+    wi = (0.9 ** i) / weight_sum
     weights.append(wi)
-print(weights)
 
 
 def generate_y_values(x_values):
