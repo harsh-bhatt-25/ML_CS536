@@ -1,36 +1,25 @@
 from random import choices
+from collections import Counter
 
 data_array = []
-m, k = 1, 10
-
-# Generate Weights
-weight_sum = 0
-for i in range(2, k + 1):
-    weight_sum += 0.9 ** i
-
-weights = []
-for i in range(2, k + 1):
-    wi = (0.9 ** i) / weight_sum
-    weights.append(wi)
+m, k = 1, 20
 
 
 def generate_y_values(x_values):
-    check_sum = 0
-    y = -1
-    for i in range(1, k):
-        check_sum += weights[i - 1] * x_values[i]
-    if check_sum >= 0.5:
-        y = x_values[0]
+    if x_values[0] == 0:
+        y = Counter(x_values[1:8]).most_common()[0][0]
     else:
-        y = 1 - x_values[0]
+        y = Counter(x_values[8:15]).most_common()[0][0]
     return y
 
 
 def generate_data_points(k):
     x_values = [choices([0, 1], [0.5, 0.5])[0]]
 
-    for i in range(1, k):
+    for i in range(1, 15):
         x_values.append(choices([x_values[i - 1], (1 - x_values[i - 1])], [0.75, 0.25])[0])
+    for i in range(15, k+1):
+        x_values.append(choices([1, 0], [0.5, 0.5])[0])
     y_value = generate_y_values(x_values)
     return [x_values, y_value]
 
@@ -38,7 +27,7 @@ def generate_data_points(k):
 def generate(m):
     for i in range(m):
         data_array.append(generate_data_points(k))
-        print(data_array)
 
 
 generate(m)
+print(data_array)
