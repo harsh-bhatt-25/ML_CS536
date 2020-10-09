@@ -2,9 +2,8 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, feature=None, value=None, left=None, right=None, *, label_name=None):
+    def __init__(self, feature=None, left=None, right=None, *, label_name=None):
         self.feature = feature
-        self.value = value
         self.left = left
         self.right = right
         self.label_name = label_name
@@ -27,11 +26,11 @@ class DecisionTree:
 
         indexes = [i for i in range(n_features)]
 
-        feature_index, feature_value = self.get_split_values(x_array, y, indexes)
+        feature_index= self.get_split_values(x_array, y, indexes)
         x_column = x_array[:, feature_index]
         len_x_column = len(x_column)
         for i in range(len_x_column):
-            if x_column[i] <= feature_value:
+            if x_column[i] == 0:
                 left_indices.append(i)
             else:
                 right_indices.append(i)
@@ -39,21 +38,18 @@ class DecisionTree:
         left_split, right_split = np.array(left_indices), np.array(right_indices)
         left_node = self.tree(x_array[left_split, :], y[left_split])
         right_node = self.tree(x_array[right_split, :], y[right_split])
-        return Node(feature_index, feature_value, left_node, right_node)
+        return Node(feature_index, left_node, right_node)
 
     def get_split_values(self, x_array, y, indexes):
         best_gain, split_index, split_value = -1, None, None
         for column in indexes:
             X_column = x_array[:, column]
-            values = np.array([0, 1])
-            for value in values:
-                gain = self.information_gain(X_column, y, value)
-                if gain > best_gain:
-                    best_gain = gain
-                    split_index = column
-                    split_value = value
+            gain = self.information_gain(X_column, y, 0)
+            if gain > best_gain:
+                best_gain = gain
+                split_index = column
 
-        return split_index, split_value
+        return split_index
 
     def information_gain(self, X_column, y, split_value):
         H_Y = self.H(y)
@@ -61,7 +57,7 @@ class DecisionTree:
         left_indices, right_indices = [], []
         length = len(X_column)
         for i in range(length):
-            if X_column[i] <= split_value:
+            if X_column[i] == split_value:
                 left_indices.append(i)
             else:
                 right_indices.append(i)
@@ -89,6 +85,6 @@ class DecisionTree:
         if node.label_name is not None:
             return node.label_name
 
-        if x[node.feature] <= node.value:
+        if x[node.feature] == 0:
             return self.tree_traverse(x, node.left)
         return self.tree_traverse(x, node.right)
