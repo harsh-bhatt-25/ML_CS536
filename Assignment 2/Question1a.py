@@ -1,10 +1,10 @@
 from random import choices
 
-data_array, weights = [], []
-m, k = 30, 4
+data_array, weights, y_array, x_array = [], [], [], []
+k = 4
 
 
-class GenerateDataset():
+class GenerateDataset:
 
     def __init__(self):
         # Generate Weights
@@ -33,13 +33,16 @@ class GenerateDataset():
         for i in range(1, k):
             x_values.append(choices([x_values[i - 1], (1 - x_values[i - 1])], [0.75, 0.25])[0])
         y_value = self.generate_y_values(x_values)
+        y_array.append(y_value)
+        x_array.append(x_values)
         return [x_values, y_value]
 
     def generate(self, m):
         for i in range(m):
             data_array.append(self.generate_data_points(k))
+        return x_array, y_array
 
 
-obj = GenerateDataset()
-obj.generate(m)
-print(data_array)
+# obj = GenerateDataset()
+# obj.generate(9)
+# print(data_array)

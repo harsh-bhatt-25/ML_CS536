@@ -5,7 +5,7 @@ data_array = []
 m, k = 1, 20
 
 
-class GenerateDataset():
+class GenerateDataset:
 
     def generate_y_values(self, x_values):
         if x_values[0] == 0:
