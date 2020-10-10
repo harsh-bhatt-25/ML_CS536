@@ -13,19 +13,20 @@ class Node:
 class DecisionTree:
     flag = "a"
 
-    def __init__(self):
+    def __init__(self, max_depth):
         self.root = None
+        self.max_depth = max_depth
 
     def train(self, x_array, y):
         _, features = x_array.shape
         indices = [i for i in range(features)]
         self.root = self.tree(x_array, y, indices)
 
-    def tree(self, x_array, y, feature_indices):
+    def tree(self, x_array, y, feature_indices, depth=0):
         left_indices, right_indices = [], []
         len_labels = len(set(y))
-        if len_labels == 1:
-            label_name = y[0]
+        if len_labels == 1 or depth >= self.max_depth:
+            label_name = self.max_counter(y)
             return Node(label_name=label_name)
 
         if len_labels != 1 and len(feature_indices) == 0:
@@ -48,8 +49,8 @@ class DecisionTree:
                 right_indices.append(i)
 
         # left_split, right_split = np.array(left_indices), np.array(right_indices)
-        left_node = self.tree(x_array[np.array(left_indices), :], y[np.array(left_indices)], indexes)
-        right_node = self.tree(x_array[np.array(right_indices), :], y[np.array(right_indices)], indexes)
+        left_node = self.tree(x_array[np.array(left_indices), :], y[np.array(left_indices)], indexes, depth+1)
+        right_node = self.tree(x_array[np.array(right_indices), :], y[np.array(right_indices)], indexes, depth+1)
         return Node(feature_index, feature_value, left=left_node, right=right_node)
 
     def max_counter(self, y):

@@ -1,8 +1,7 @@
 from random import choices
 from collections import Counter
 
-data_array = []
-m, k = 1, 20
+x_array, y_array, data_array = [], [], []
 
 
 class GenerateDataset:
@@ -22,13 +21,12 @@ class GenerateDataset:
         for i in range(15, k + 1):
             x_values.append(choices([1, 0], [0.5, 0.5])[0])
         y_value = self.generate_y_values(x_values)
-        return [x_values, y_value]
+        x_array.append(x_values)
+        y_array.append(y_value)
 
-    def generate(self, m):
+    def generate(self, m, k):
         for i in range(m):
             data_array.append(self.generate_data_points(k))
+        return x_array, y_array
 
 
-obj = GenerateDataset()
-obj.generate(m)
-print(data_array)

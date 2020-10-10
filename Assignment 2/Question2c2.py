@@ -13,8 +13,9 @@ class Node:
 class DecisionTree:
     flag = "a"
 
-    def __init__(self):
+    def __init__(self, min_samples):
         self.root = None
+        self.min_samples = min_samples
 
     def train(self, x_array, y):
         _, features = x_array.shape
@@ -24,8 +25,8 @@ class DecisionTree:
     def tree(self, x_array, y, feature_indices):
         left_indices, right_indices = [], []
         len_labels = len(set(y))
-        if len_labels == 1:
-            label_name = y[0]
+        if len_labels == 1 or len(x_array) <= self.min_samples:
+            label_name = self.max_counter(y)
             return Node(label_name=label_name)
 
         if len_labels != 1 and len(feature_indices) == 0:
