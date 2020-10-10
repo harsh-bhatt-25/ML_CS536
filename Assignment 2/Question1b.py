@@ -2,12 +2,16 @@ import numpy as np
 
 
 class Node:
-    def __init__(self, feature=None, value=None, *, left=None, right=None, label_name=None):
+    def __init__(self, feature=None, value=None, *, left=None, right=None, label_name=None, entropy=None, samples=None,
+                 counts=None):
         self.feature = feature
         self.value = value
         self.left = left
         self.right = right
         self.label_name = label_name
+        self.entropy = entropy
+        self.samples = samples
+        self.counts = counts
 
 
 class DecisionTree:
@@ -33,8 +37,8 @@ class DecisionTree:
             return Node(label_name=value)
 
         indexes = feature_indices
-        feature_index, best_gain, feature_value = self.get_split_index(x_array, y, indexes, np.unique(y))
-        if best_gain == 0:
+        feature_index, entropy, feature_value = self.get_split_index(x_array, y, indexes, np.unique(y))
+        if entropy == 0:
             value = self.max_counter(y)
             return Node(label_name=value)
         # indexes.remove(feature_index)
@@ -50,7 +54,8 @@ class DecisionTree:
         # left_split, right_split = np.array(left_indices), np.array(right_indices)
         left_node = self.tree(x_array[np.array(left_indices), :], y[np.array(left_indices)], indexes)
         right_node = self.tree(x_array[np.array(right_indices), :], y[np.array(right_indices)], indexes)
-        return Node(feature_index, feature_value, left=left_node, right=right_node)
+        return Node(feature_index, feature_value, left=left_node, right=right_node, entropy=entropy,
+                    samples=len(y), counts=np.bincount(y))
 
     def max_counter(self, y):
         counts = np.bincount(y)
@@ -62,17 +67,17 @@ class DecisionTree:
         return max_value
 
     def get_split_index(self, x_array, y, indexes, unique_y):
-        best_gain, split_index, split_value = -1, None, None
+        entropy, split_index, split_value = -1, None, None
         for column in indexes:
             X_column = x_array[:, column]
             for value in unique_y:
                 gain = self.information_gain(X_column, y, value)
-                if gain > best_gain:
-                    best_gain = gain
+                if gain > entropy:
+                    entropy = gain
                     split_index = column
                     split_value = value
 
-        return split_index, best_gain, split_value
+        return split_index, entropy, split_value
 
     def information_gain(self, X_column, y, split_value):
         H_Y = self.H(y)
@@ -125,9 +130,12 @@ class DecisionTree:
             current = queue.pop(0)
             if current != "a":
                 if current.label_name is not None:
-                    print("Value ", current.label_name, end=" ")
+                    print("Value = {}, Entropy = {}".format(current.label_name, current.entropy, end=" "))
                 else:
-                    print("Feature ", current.feature, end=" ")
+                    print("Feature = {}, Samples = {}, Counts = {}, Entropy = {}".format(current.feature,
+                                                                                         current.samples,
+                                                                                         current.counts,
+                                                                                         current.entropy, end=" "))
                 if current.left is not None:
                     queue.append(current.left)
                 if current.right is not None:

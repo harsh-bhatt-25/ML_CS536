@@ -18,8 +18,6 @@ x_test, y_test = np.array(x_te), np.array(y_te)
 clf = DecisionTree(10)
 clf.train(x_train, y_train)
 
-# clf.print_tree(clf.root)
-
 y_pred = clf.predict(x_test)
 acc = accuracy(y_test, y_pred)
 print("Testing Accuracy", 1 - acc)

@@ -8,18 +8,18 @@ def accuracy(y_true, y_pred):
     return 1 - accuracy
 
 
-data_obj = GenerateDataset(10)
-x_tr, y_tr = data_obj.generate(1000, 10)
+data_obj = GenerateDataset(4)
+x_tr, y_tr = data_obj.generate(30, 4)
 x_train = np.array(x_tr)
 y_train = np.array(y_tr)
-x_te, y_te = data_obj.generate(10000, 10)
+x_te, y_te = data_obj.generate(100, 4)
 x_test, y_test = np.array(x_te), np.array(y_te)
 
 
 clf = DecisionTree()
 clf.train(x_train, y_train)
 
-# clf.print_tree(clf.root)
+clf.print_tree(clf.root)
 
 y_pred = clf.predict(x_test)
 acc = accuracy(y_test, y_pred)

@@ -34,8 +34,8 @@ class DecisionTree:
             return Node(label_name=value)
 
         indexes = feature_indices
-        feature_index, best_gain, feature_value = self.get_split_index(x_array, y, indexes, np.unique(y))
-        if best_gain == 0:
+        feature_index, entropy, feature_value = self.get_split_index(x_array, y, indexes, np.unique(y))
+        if entropy == 0:
             value = self.max_counter(y)
             return Node(label_name=value)
         # indexes.remove(feature_index)
@@ -63,17 +63,17 @@ class DecisionTree:
         return max_value
 
     def get_split_index(self, x_array, y, indexes, unique_y):
-        best_gain, split_index, split_value = -1, None, None
+        entropy, split_index, split_value = -1, None, None
         for column in indexes:
             X_column = x_array[:, column]
             for value in unique_y:
                 gain = self.information_gain(X_column, y, value)
-                if gain > best_gain:
-                    best_gain = gain
+                if gain > entropy:
+                    entropy = gain
                     split_index = column
                     split_value = value
 
-        return split_index, best_gain, split_value
+        return split_index, entropy, split_value
 
     def information_gain(self, X_column, y, split_value):
         H_Y = self.H(y)
@@ -116,26 +116,3 @@ class DecisionTree:
             return self.tree_traverse(x, node.left)
         return self.tree_traverse(x, node.right)
 
-    def print_tree(self, root):
-        if root.feature is None and root.label_name is None:
-            return
-
-        queue = [root, self.flag]
-
-        while True:
-            current = queue.pop(0)
-            if current != "a":
-                if current.label_name is not None:
-                    print("Value ", current.label_name, end=" ")
-                else:
-                    print("Feature ", current.feature, end=" ")
-                if current.left is not None:
-                    queue.append(current.left)
-                if current.right is not None:
-                    queue.append(current.right)
-            else:
-                print("")
-                if len(queue) == 0:
-                    break
-                else:
-                    queue.append(self.flag)
