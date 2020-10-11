@@ -1,10 +1,11 @@
 from random import choices
 from collections import Counter
 
-x_array, y_array, data_array = [], [], []
 
 
 class GenerateDataset:
+    def __init__(self):
+        self.x_array, self.y_array = [], []
 
     def generate_y_values(self, x_values):
         if x_values[0] == 0:
@@ -21,12 +22,12 @@ class GenerateDataset:
         for i in range(15, k + 1):
             x_values.append(choices([1, 0], [0.5, 0.5])[0])
         y_value = self.generate_y_values(x_values)
-        x_array.append(x_values)
-        y_array.append(y_value)
+        self.x_array.append(x_values)
+        self.y_array.append(y_value)
 
     def generate(self, m, k):
         for i in range(m):
-            data_array.append(self.generate_data_points(k))
-        return x_array, y_array
+            self.generate_data_points(k)
+        return np.array(self.x_array), np.array(self.y_array)
 
 
