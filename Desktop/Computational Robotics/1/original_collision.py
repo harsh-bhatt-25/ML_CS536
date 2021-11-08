@@ -299,13 +299,13 @@ def check_collision(robo, obs, return_points=False):
                 p3 = Point(robot_config[j][0], robot_config[j][1])
                 p4 = Point(robot_config[j + 1][0], robot_config[j + 1][1])
                 if do_segments_intersect(p1, p2, p3, p4):
-                    print("-----------------------------------------------------------------")
+                    # print("-----------------------------------------------------------------")
                     print("False")
-                    print(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y)
+                    # print(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y)
                     return False
                 else:
                     print("True")
-                    print(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y)
+                    # print(p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, p4.x, p4.y)
 
     # for i in range(len(world_points) - 1):
     #     for j in range(len_robot):

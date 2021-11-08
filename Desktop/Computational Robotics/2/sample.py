@@ -1,9 +1,9 @@
-from visualizer import visualize_points
 import random
+import math
 
 
 def sample():
-    return tuple([round(random.uniform(0, 10), 1), round(random.uniform(0, 10), 1)])
+    return [round(random.uniform(0, 10), 1), round(random.uniform(0, 10), 1), math.radians(round(random.uniform(0, 360), 0))]
 
 
 if __name__ == '__main__':

@@ -108,6 +108,7 @@ import numpy as np
 from original_collision import isCollisionFree, do_segments_intersect, Point, check_collision, get_intersection_point
 from file_parse import parse_problem, get_robot_global_coordinates
 from sampler import sample
+from collections import defaultdict
 
 
 class Tree:
@@ -116,8 +117,9 @@ class Tree:
         self.obstacles = obstacles
         self.goal = goal
         self.vertices = set()
-        self.edges = {}
+        # self.edges = defaultdict(list)
         self.vertices.add(start)
+        self.edges = {}
         self.edges[None] = start
         self.stepSize = 0.6
 

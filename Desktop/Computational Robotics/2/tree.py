@@ -1,12 +1,16 @@
 from collision import isCollisionFree
 import numpy as np
 from collections import defaultdict
+import math
 
 np.seterr(divide='ignore', invalid='ignore')
 
 
-def get_manhattan_distance(p1, p2):
-    return np.abs(np.array([p1[0], p1[1]]) - np.array([p2[0], p2[1]])).sum()
+def get_distance(p1, p2):
+    theta1, theta2 = p1[2], p2[2]
+    theta = theta1 - theta2
+    theta = math.radians((math.degrees(theta) + 180) % 360 - 180)
+    return np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1], p2[1]) + np.square(theta))
 
 
 class Tree:
@@ -25,7 +29,6 @@ class Tree:
         if point1 != point2:
             self.vertex_and_edges[point1].add(point2)
             self.vertex_and_edges[point2] = set()
-            self.cost[(point1, point2)] = get_manhattan_distance(point1, point2) + self.get_cost(point1)
 
     def exists(self, point):
         return True if point in self.vertex_and_edges else False
@@ -39,7 +42,7 @@ class Tree:
         min_dist = float("inf")
         min_pt = None
         for vertex in self.vertex_and_edges.keys():
-            distance = np.linalg.norm(np.array([vertex[0], vertex[1]]) - np.array([point[0], point[1]]))
+            distance = get_distance(vertex, point)
             if distance < min_dist:
                 min_pt = vertex
                 min_dist = distance
@@ -62,15 +65,3 @@ class Tree:
                 break
         self.add(point1, i)
         return i
-
-    def get_cost(self, point):
-        cost = 0
-        parent = point
-        while parent != self.start:
-            pt = parent
-            parent = self.parent(pt)
-            cost += self.cost[(parent, pt)]
-        return cost
-
-    def rewire(self):
-        pass
