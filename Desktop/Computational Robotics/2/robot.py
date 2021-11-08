@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Robot:
     def __init__(self, width, height):
         self.width = width
@@ -16,7 +17,7 @@ class Robot:
         w, l = self.width, self.height
         x_t, y_t = self.translation
         points = []
-        for x, y in [(-w/2, -l/2), (-w/2, l/2), (w/2, l/2), (w/2, -l/2)]:
+        for x, y in [(-w / 2, -l / 2), (-w / 2, l / 2), (w / 2, l / 2), (w / 2, -l / 2)]:
             new_x = x * np.cos(self.rotation) - y * np.sin(self.rotation) + x_t
             new_y = x * np.sin(self.rotation) + y * np.cos(self.rotation) + y_t
             points.append((new_x, new_y))

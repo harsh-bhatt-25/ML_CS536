@@ -9,6 +9,8 @@ np.seterr(divide='ignore', invalid='ignore')
 def get_distance(p1, p2):
     theta1, theta2 = p1[2], p2[2]
     theta = theta1 - theta2
+    if theta < -180:
+        theta += 360
     theta = math.radians((math.degrees(theta) + 180) % 360 - 180)
     return np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1], p2[1]) + np.square(theta))
 
@@ -39,29 +41,28 @@ class Tree:
                 return vertex
 
     def nearest(self, point):
-        min_dist = float("inf")
-        min_pt = None
+        minimum, nearest_point = float("inf"), None
         for vertex in self.vertex_and_edges.keys():
             distance = get_distance(vertex, point)
-            if distance < min_dist:
-                min_pt = vertex
-                min_dist = distance
-        return min_pt
+            if distance < minimum:
+                nearest_point = vertex
+                minimum = distance
+        return nearest_point
 
     def extend(self, point1, point2):
-        i = point1
+        prev = point1
         x, y = point1
         while True:
-            # len_ab = self.euclidean_dist((x, y), point2)
-            len_ab = np.linalg.norm(np.array([x, y]) - np.array([point2[0], point2[1]]))
-            len_ratio = 0.1 / len_ab
-            x = round((1 - len_ratio) * i[0] + len_ratio * point2[0], 2)
-            y = round((1 - len_ratio) * i[1] + len_ratio * point2[1], 2)
+            distance = np.linalg.norm(np.array([x, y]) - np.array([point2[0], point2[1]]))
+            len_ratio = 0.1 / distance
+            x = round((1 - len_ratio) * prev[0] + len_ratio * point2[0], 2)
+            y = round((1 - len_ratio) * prev[1] + len_ratio * point2[1], 2)
             if not isCollisionFree(self.robot, (x, y), self.obstacles):
                 break
+
             if np.linalg.norm(np.array([point1[0], point1[1]]) - np.array([x, y])) < np.linalg.norm(np.array([point1[0], point1[1]]) - np.array([point2[0], point2[1]])):
-                i = x, y
+                prev = x, y
             else:
                 break
-        self.add(point1, i)
-        return i
+        self.add(point1, prev)
+        return prev
