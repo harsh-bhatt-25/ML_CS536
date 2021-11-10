@@ -28,13 +28,15 @@ class Robot:
         q, u = state, control
         return [u[0] * np.cos(q[2] + np.pi / 2.), u[0] * np.sin(q[2] + np.pi / 2.), u[1]]
 
-
     def propagate(self, state, controls, durations, dt):
         sequence = [state]
         current_state = state
-        for idx, control in enumerate(controls):
-            kinematics_value = self.kinematics(current_state, control)
-            q_new = (round(current_state[0] + kinematics_value[0] * durations[idx] * dt, 1), round(current_state[1] + kinematics_value[1] * durations[idx] * dt, 1), round(current_state[2] + kinematics_value[2] * durations[idx] * dt, 2))
-            sequence.append(q_new)
-            current_state = q_new
+        length = len(controls)
+        for i in range(length):
+            kinematics_value = self.kinematics(current_state, controls[i])
+            new_state = (round(current_state[0] + kinematics_value[0] * durations[i] * dt, 1), round(current_state[1] \
+                + kinematics_value[1] * durations[i] * dt, 1), round(current_state[2] + kinematics_value[2] * \
+                                                                     durations[i] * dt, 2))
+            sequence.append(new_state)
+            current_state = new_state
         return sequence

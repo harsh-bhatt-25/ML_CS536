@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
 import cv2
 
-video_writer = cv2.VideoWriter("animation.mp4", cv2.VideoWriter_fourcc(*"avc1"), 1, (600, 600))
+video_writer = cv2.VideoWriter("animation.mp4", cv2.VideoWriter_fourcc(*"avc1"), 25, (640, 480))
 
 def animate(c_robot, path, c_obstacles, start, goal):
     length = len(path)
@@ -19,7 +19,7 @@ def animate(c_robot, path, c_obstacles, start, goal):
     for path_index in range(length-1):
         start_x1, start_y1, start_theta1 = path[path_index]
         final_x2, final_y2, final_theta2 = path[path_index+1]
-        frames = 20
+        frames = 2
         dx, dy, dz = (final_x2 - start_x1)/frames, (final_y2 - start_y1)/frames, (final_theta2 - start_theta1)/frames
 
         x1, y1 = start_x1, start_y1
@@ -115,11 +115,73 @@ def visualize(c_robot, c_obstacles, start, goal, points=None, lines=None):
 
 
 def visualize_problem(c_robot, c_obstacles, start, goal):
-    visualize(c_robot, c_obstacles, start, goal)
+    numpy_obstacles = []
+    numpy_robot = []
+
+    fig, ax = plt.subplots()
+
+    for current_obstacle in c_obstacles:
+        numpy_obstacles.append(np.array(current_obstacle))
+
+    for current_robot in c_robot:
+        numpy_robot.append(np.array(current_robot))
+
+    robot_view = PolyCollection(numpy_robot, cmap=matplotlib.cm.jet, edgecolors="none")
+    robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
+    robot_view.set_color([0.5, 0, 0.5])
+    ax.add_collection(robot_view)
+
+    # Creating a collection of obstacles and adding them to the final collection
+    polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
+    polygonal_obstacles.set_color([0.68, 0.85, 0.9])
+    ax.add_collection(polygonal_obstacles)
+
+    ax.autoscale_view()
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+
+    # Plotting start and end points
+    plt.plot(start[0], start[1], 'g.')
+    plt.plot(goal[0], goal[1], 'r.')
+
+    plt.show()
 
 
 def visualize_points(points, c_robot, c_obstacles, start, goal):
-    visualize(c_robot, c_obstacles, start, goal, points)
+    numpy_obstacles = []
+    numpy_robot = []
+
+    fig, ax = plt.subplots()
+
+    for current_obstacle in c_obstacles:
+        numpy_obstacles.append(np.array(current_obstacle))
+
+    for current_robot in c_robot:
+        numpy_robot.append(np.array(current_robot))
+
+    # Adding the robot in the collection with random colors
+    robot_view = PolyCollection(numpy_robot, cmap=matplotlib.cm.jet, edgecolors="none")
+    robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
+    robot_view.set_color([0.5, 0, 0.5])
+    ax.add_collection(robot_view)
+
+    # Creating a collection of obstacles and adding them to the collection
+    polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
+    polygonal_obstacles.set_color([0.68, 0.85, 0.9])
+    ax.add_collection(polygonal_obstacles)
+
+    ax.autoscale_view()
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+
+    # Plotting start and end points
+    plt.plot(start[0], start[1], 'g.')
+    plt.plot(goal[0], goal[1], 'r.')
+
+    for point in points:
+        plt.plot(point[0], point[1], 'k.')
+
+    plt.show()
 
 
 def visualize_path(lines, c_robot, c_obstacles, start, goal):

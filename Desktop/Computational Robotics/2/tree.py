@@ -62,8 +62,9 @@ class Tree:
                 else:
                     return False
 
-            if np.linalg.norm(np.array([point1[0], point1[1]]) - np.array([x, y])) < np.linalg.norm(
-                    np.array([point1[0], point1[1]]) - np.array([point2[0], point2[1]])):
+            if get_distance(point1, [x, y, theta]) < get_distance(point1, point2):
+            # if np.linalg.norm(np.array([point1[0], point1[1]]) - np.array([x, y])) < np.linalg.norm(
+            #         np.array([point1[0], point1[1]]) - np.array([point2[0], point2[1]])):
                 prev = x, y, theta
             else:
                 break

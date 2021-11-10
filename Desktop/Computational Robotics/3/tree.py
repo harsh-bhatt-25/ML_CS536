@@ -24,8 +24,8 @@ class Tree:
             theta = math.radians((math.degrees(theta) + 180) % 360 - 180)
             return np.sqrt(np.square(p1[0] - p2[0]) + np.square(p1[1] - p2[1]) + np.square(theta))
         except:
-            print("------------------------------")
-            print(p1, p2)
+            print(p1, self.vertex_and_edges, p2)
+
 
     def add(self, point1, point2):
         point1 = tuple(point1)
@@ -52,8 +52,9 @@ class Tree:
         return nearest_point
 
     def extend(self, point, n1, n2, dt):
-        u = [(np.random.uniform(2., 6.), np.random.uniform(0.01, 0.09)) for i in range(0, 50)]
-        n = [np.random.uniform(low=n1, high=n2) for _ in range(0, 50)]
+        x = np.random.uniform(0.1, 0.9)
+        u = [(x, x) for _ in range(0, 40)]
+        n = [np.random.uniform(low=n1, high=n2) for _ in range(0, 40)]
         states = self.robot.propagate(point, u, n, dt)
 
         cur = point
@@ -65,4 +66,4 @@ class Tree:
             self.add(point, cur)
             return cur
         else:
-            return None
+            return cur
