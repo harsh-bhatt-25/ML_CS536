@@ -1,59 +1,88 @@
 from file_parse import parse_problem, get_robot_global_coordinates
+from sampler import sample
 import numpy as np
 import random
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.collections import PolyCollection, LineCollection
-import pylab as pl
-from PIL import Image
-from PIL import ImageDraw
-import random as rnd
+from matplotlib.collections import PolyCollection
+import cv2
+
+video_writer = cv2.VideoWriter("animation.mp4", cv2.VideoWriter_fourcc(*"avc1"), 25, (640, 480))
 
 
-# def visualize_problem(c_robot, c_obstacles, start, goal):
-#
-#     numpy_obstacles = []
-#
-#     for current_obstacle in c_obstacles:
-#         numpy_obstacles.append(np.array(current_obstacle))
-#     fig, ax = plt.subplots()
-#
-#     # Adding the robot in the collection with random colors
-#     robot_view = PolyCollection([np.array(c_robot)], cmap=matplotlib.cm.jet, edgecolors="none")
-#     robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
-#     ax.add_collection(robot_view)
-#
-#     # Creating a collection of obstacles and adding them to the collection
-#     polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
-#     polygonal_obstacles.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
-#     ax.add_collection(polygonal_obstacles)
-#
-#     ax.autoscale_view()
-#     ax.set_xlim(0, 10)
-#     ax.set_ylim(0, 10)
-#
-#     # Plotting start and end points
-#     plt.plot(start[0], start[1], 'go')
-#     plt.plot(goal[0], goal[1], 'ro')
-#
-#     plt.show()
-
-def visualize(c_robot, c_obstacles, start, goal, points=None, lines=None):
+def animate(c_robot, path, c_obstacles, start, goal):
+    length = len(path)
     numpy_obstacles = []
+    fig, ax = plt.subplots()
+
+    for current_obstacle in c_obstacles:
+        numpy_obstacles.append(np.array(current_obstacle))
+
+    i = 0
+
+    for path_index in range(length-1):
+        start_x1, start_y1 = path[path_index]
+        final_x2, final_y2 = path[path_index+1]
+        frames = 20
+        dx, dy = (final_x2 - start_x1)/frames, (final_y2 - start_y1)/frames
+
+        x1, y1 = start_x1, start_y1
+
+        index=0
+        while index < frames:
+            index+=1
+            x2, y2 = x1 + dx, y1 + dy
+
+
+            ax.autoscale_view()
+            ax.set_xlim(0, 10)
+            ax.set_ylim(0, 10)
+
+
+            for current_robot in c_robot:
+                rob = get_robot_global_coordinates(current_robot, x2, y2)
+
+            robot_view = PolyCollection(np.array([rob]), cmap=matplotlib.cm.jet, edgecolors="none")
+            robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
+            robot_view.set_color([0.1, 0, 0.5])
+            ax.add_collection(robot_view)
+
+            polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
+            polygonal_obstacles.set_color([0.68, 0.85, 0.9])
+            ax.add_collection(polygonal_obstacles)
+
+            plt.plot(start[0], start[1], 'g.')
+            plt.plot(goal[0], goal[1], 'r.')
+
+            # plt.plot((x1, x2), (y1, y2), 'g')
+            x1 = x2
+            y1 = y2
+            plt.savefig(f"image.png")
+            image = cv2.imread(f"image.png")
+            video_writer.write(image)
+    plt.show()
+
+
+def visualize(c_robot, c_obstacles, start, goal, points=None, lines=None, branches=None):
+    numpy_obstacles = []
+    numpy_robot = []
 
     for current_obstacle in c_obstacles:
         numpy_obstacles.append(np.array(current_obstacle))
     fig, ax = plt.subplots()
 
+    for current_robot in c_robot:
+        print(current_robot)
+        numpy_robot.append(np.array(current_robot))
+
     # Adding the robot in the collection with random colors
-    robot_view = PolyCollection([np.array(c_robot)], cmap=matplotlib.cm.jet, edgecolors="none")
+    robot_view = PolyCollection(numpy_robot, cmap=matplotlib.cm.jet, edgecolors="none")
     robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
     robot_view.set_color([0.5, 0, 0.5])
     ax.add_collection(robot_view)
 
     # Creating a collection of obstacles and adding them to the collection
     polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
-    # polygonal_obstacles.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
     polygonal_obstacles.set_color([0.68, 0.85, 0.9])
     ax.add_collection(polygonal_obstacles)
 
@@ -69,25 +98,103 @@ def visualize(c_robot, c_obstacles, start, goal, points=None, lines=None):
         for point in points:
             plt.plot(point[0], point[1], 'k.')
 
+
     if lines:
-        for line in lines:
-            xs = (line[0][0], line[1][0])
-            ys = (line[0][1], line[1][1])
+        length = len(lines)
+        for i in range(length-1):
+            xs = (lines[i][0], lines[i+1][0])
+            ys = (lines[i][1], lines[i+1][1])
             plt.plot(xs, ys)
+
+    if branches:
+        length = len(branches)
+        for i in range(length-1):
+            xs = (branches[i][0][0], branches[i][1][0])
+            ys = (branches[i][0][1], branches[i][1][1])
+            plt.plot(xs, ys)
+
+    plt.savefig("image.png")
+    plt.show()
+    # image = cv2.imread("image.jpg")
+    # video_writer.write(image)
+
+
+def visualize_problem(c_robot, c_obstacles, start, goal):
+    numpy_obstacles = []
+    numpy_robot = []
+
+    fig, ax = plt.subplots()
+
+    for current_obstacle in c_obstacles:
+        numpy_obstacles.append(np.array(current_obstacle))
+
+    for current_robot in c_robot:
+        numpy_robot.append(np.array(current_robot))
+
+    robot_view = PolyCollection(numpy_robot, cmap=matplotlib.cm.jet, edgecolors="none")
+    robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
+    robot_view.set_color([0.5, 0, 0.5])
+    ax.add_collection(robot_view)
+
+    # Creating a collection of obstacles and adding them to the final collection
+    polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
+    polygonal_obstacles.set_color([0.68, 0.85, 0.9])
+    ax.add_collection(polygonal_obstacles)
+
+    ax.autoscale_view()
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+
+    # Plotting start and end points
+    plt.plot(start[0], start[1], 'g.')
+    plt.plot(goal[0], goal[1], 'r.')
 
     plt.show()
 
 
-def visualize_problem(c_robot, c_obstacles, start, goal):
-    visualize(c_robot, c_obstacles, start, goal)
-
-
 def visualize_points(points, c_robot, c_obstacles, start, goal):
-    visualize(c_robot, c_obstacles, start, goal, points)
+    numpy_obstacles = []
+    numpy_robot = []
+
+    fig, ax = plt.subplots()
+
+    for current_obstacle in c_obstacles:
+        numpy_obstacles.append(np.array(current_obstacle))
+
+    for current_robot in c_robot:
+        numpy_robot.append(np.array(current_robot))
+
+    # Adding the robot in the collection with random colors
+    robot_view = PolyCollection(numpy_robot, cmap=matplotlib.cm.jet, edgecolors="none")
+    robot_view.set_color([random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1)])
+    robot_view.set_color([0.5, 0, 0.5])
+    ax.add_collection(robot_view)
+
+    # Creating a collection of obstacles and adding them to the collection
+    polygonal_obstacles = PolyCollection(numpy_obstacles, cmap=matplotlib.cm.jet, edgecolors="none")
+    polygonal_obstacles.set_color([0.68, 0.85, 0.9])
+    ax.add_collection(polygonal_obstacles)
+
+    ax.autoscale_view()
+    ax.set_xlim(0, 10)
+    ax.set_ylim(0, 10)
+
+    # Plotting start and end points
+    plt.plot(start[0], start[1], 'g.')
+    plt.plot(goal[0], goal[1], 'r.')
+
+    for point in points:
+        plt.plot(point[0], point[1], 'k.')
+
+    plt.show()
 
 
 def visualize_lines(lines, c_robot, c_obstacles, start, goal):
     visualize(c_robot, c_obstacles, start, goal, lines=lines)
+
+
+def visualize_branches(lines, c_robot, c_obstacles, start, goal):
+    visualize(c_robot, c_obstacles, start, goal, branches=lines)
 
 
 if __name__ == '__main__':
@@ -96,9 +203,16 @@ if __name__ == '__main__':
     robot, obstacles, problems = parse_problem(world, problem)
 
     # Translate robot to global configuration
-    qx, qy = 1, 2
-    robot = get_robot_global_coordinates(robot, qx, qy)
+    r1 = get_robot_global_coordinates(robot, problems[0][0][0], problems[0][0][1])
+    r2 = get_robot_global_coordinates(robot, problems[0][1][0], problems[0][1][1])
+    robot_config = [r1, r2]
 
-    visualize_problem(robot, obstacles, problems[0][0], problems[0][1])
-    points = [[0.3, 1.4], [8.4, 1.3], [6.6, 4.4], [5.0, 6.7], [5.8, 1.4]]
-    visualize_points(points, robot, obstacles, problems[0][0], problems[0][1])
+    # Visualize the problem
+    # visualize_problem(robot_config, obstacles, problems[0][0], problems[0][1])
+
+    # Visualize the points + problem
+    points = []
+    iters = 10
+    for i in range(10):
+        points.append(sample())
+    visualize_points(points, robot_config, obstacles, problems[0][0], problems[0][1])

@@ -1,7 +1,7 @@
-from sampler import sample
+from sample import sample
 from tree import Tree
 from file_parse import parse_problem
-from visualizer import visualize_lines, visualize_branches
+from visualizer import visualize_path, animate
 import numpy as np
 
 
@@ -30,39 +30,36 @@ def rrt(robot, obstacles, start, goal, n_iter, samples=None):
     goal = tuple(goal)
     tree = Tree(robot, obstacles, start, goal)
 
-    testing_iters = 1
-    successes = 0
-    for _ in range(testing_iters):
-        if not samples:
-            for _ in range(n_iter):
-                sample_point = sample()
-                near_point = tree.nearest(sample_point)
-                valid_connection = tree.extend(near_point, sample_point)
-                if is_near_target(tree, valid_connection):
-                    break
+    if not samples:
+        for _ in range(n_iter):
+            sample_point = sample()
+            near_point = tree.nearest(sample_point)
+            valid_connection = tree.extend(near_point, sample_point)
+            if is_near_target(tree, valid_connection):
+                break
 
-            path = get_path(tree, n_iter)
-            if path:
-                successes += 1
-        else:
-            for sample_point in samples:
-                near_point = tree.nearest(sample_point)
-                valid_connection = tree.extend(near_point, sample_point)
-                if is_near_target(tree, valid_connection):
-                    break
+        path = get_path(tree, n_iter)
+    else:
+        for sample_point in samples:
+            near_point = tree.nearest(sample_point)
+            valid_connection = tree.extend(near_point, sample_point)
+            if is_near_target(tree, valid_connection):
+                break
 
-            path = get_path(tree, n_iter)
-            if path:
-                successes += 1
+        path = get_path(tree, n_iter)
 
     branches = []
     for key, value in tree.vertex_and_edges.items():
         for i in value:
             branches.append([key, i])
 
-    if path:
-        visualize_lines(path, [robot], obstacles, start, goal)
-        # visualize_branches(branches, robot, obstacles, start, goal)
+    robot.set_pose((start[0], start[1], 0))
+    initial = robot.transform()
+    robot.set_pose((goal[0], goal[1], 1.8))
+    final = robot.transform()
+
+    animate(robot, path, obstacles, start, goal)
+    visualize_path(path, [initial, final], obstacles, start, goal)
     return path
 
 

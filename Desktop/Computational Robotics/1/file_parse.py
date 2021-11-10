@@ -22,18 +22,18 @@ def parse_problem(world_file, problem_file):
             current_line = list(map(float, current_line.split()))
             current_line = [current_line[i: i + n] for i in range(0, len(current_line), n)]
             if not is_robot:
-                current_robot = tuple(current_line)
+                current_robot = current_line
                 is_robot += 1
             else:
-                current_obstacles.append(tuple(current_line))
+                current_obstacles.append(current_line)
 
     with open(problem_file, "r") as f:
         for current_line in f.readlines():
             current_line = list(map(float, current_line.split()))
             current_line = [current_line[i: i + n] for i in range(0, len(current_line), n)]
-            current_problems.append(tuple(current_line))
+            current_problems.append(current_line)
 
-    return [current_robot, current_obstacles, current_problems]
+    return (current_robot, current_obstacles, current_problems)
 
 
 if __name__ == '__main__':

@@ -1,11 +1,9 @@
 from file_parse import parse_problem
 import numpy as np
 import random
-from robot import Robot
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.collections import PolyCollection
-from sample import sample
 import cv2
 
 video_writer = cv2.VideoWriter("animation.mp4", cv2.VideoWriter_fourcc(*"avc1"), 1, (600, 600))
@@ -143,7 +141,7 @@ if __name__ == '__main__':
 
     n = 5
     points = []
-    for _ in range(5):
-        points.append(sample())
-    # visualize_problem([initial, final], obstacles, problems[0][0], problems[0][1])
-    visualize_points(points, [initial, final], obstacles, problems[0][0], problems[0][1])
+    # for _ in range(5):
+    #     points.append(sample())
+    # # visualize_problem([initial, final], obstacles, problems[0][0], problems[0][1])
+    # visualize_points(points, [initial, final], obstacles, problems[0][0], problems[0][1])

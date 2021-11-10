@@ -1,12 +1,6 @@
 from collision import isCollisionFree
 import numpy as np
-from collections import defaultdict
-
 np.seterr(divide='ignore', invalid='ignore')
-
-
-def get_manhattan_distance(p1, p2):
-    return np.abs(np.array([p1[0], p1[1]]) - np.array([p2[0], p2[1]])).sum()
 
 
 class Tree:
@@ -18,6 +12,8 @@ class Tree:
         self.vertex_and_edges = {self.start: set()}
         self.success = False
         self.cost = {}
+        self.rewire_flag = False
+        self.near_point = None
 
     def add(self, point1, point2):
         point1 = tuple(point1)
@@ -25,7 +21,6 @@ class Tree:
         if point1 != point2:
             self.vertex_and_edges[point1].add(point2)
             self.vertex_and_edges[point2] = set()
-            self.cost[(point1, point2)] = get_manhattan_distance(point1, point2) + self.get_cost(point1)
 
     def exists(self, point):
         return True if point in self.vertex_and_edges else False
@@ -47,31 +42,56 @@ class Tree:
     def extend(self, point1, point2):
         prev = point1
         x, y = point1
-
+        step = 0.1
         while True:
             distance = np.linalg.norm(np.array([x, y]) - np.array([point2[0], point2[1]]))
-            len_ratio = 0.1 / distance
-            x = round((1 - len_ratio) * prev[0] + len_ratio * point2[0], 2)
-            y = round((1 - len_ratio) * prev[1] + len_ratio * point2[1], 2)
+            x = round((1 - step / distance) * prev[0] + step / distance * point2[0], 2)
+            y = round((1 - step / distance) * prev[1] + step / distance * point2[1], 2)
             if not isCollisionFree(self.robot, (x, y), self.obstacles):
-                break
+                if not self.rewire_flag:
+                    break
+                else:
+                    return False
 
             if np.linalg.norm(np.array([point1[0], point1[1]]) - np.array([x, y])) < np.linalg.norm(
                     np.array([point1[0], point1[1]]) - np.array([point2[0], point2[1]])):
                 prev = x, y
             else:
                 break
-        self.add(point1, prev)
-        return prev
+        if not self.rewire_flag:
+            self.add(point1, prev)
+            self.cost[(point1, prev)] = np.linalg.norm(np.array([point1[0], point1[1]]) - np.array([prev[0], prev[1]]))
+            return prev
+        else:
+            return True
 
     def get_cost(self, point):
-        cost = 0
-        parent = point
-        while parent != self.start:
-            pt = parent
+        cost, pt = 0, point
+        while pt != self.start:
             parent = self.parent(pt)
-            cost += self.cost[(parent, pt)]
+            try:
+                cost += self.cost[(parent, pt)]
+            except:
+                return 100
+            pt = parent
         return cost
 
-    def rewire(self):
-        pass
+    def rewire(self, point, r):
+        nearest_node, node_cost = self.near_point, None
+        minimum_dist = float("inf")
+        for current_node in self.vertex_and_edges:
+            node_cost = self.get_cost(current_node)
+            distance = np.linalg.norm(np.array([current_node[0], current_node[1]]) - np.array([point[0], point[1]]))
+            final_cost = node_cost + distance
+            if current_node == point:
+                continue
+            if distance < r:
+                if final_cost < minimum_dist and self.extend(current_node, point):
+                    nearest_node = current_node
+                    minimum_dist = final_cost
+        if nearest_node != self.near_point:
+            if point in self.vertex_and_edges[self.near_point]:
+                self.vertex_and_edges[self.near_point].remove(point)
+                self.vertex_and_edges[nearest_node].add(point)
+                self.cost[(nearest_node, point)] = node_cost
+        return nearest_node
